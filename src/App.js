@@ -6,8 +6,9 @@ import loading from './loading.svg';
 import './App.css';
 import Sound from 'react-sound';
 import Button from './Button';
+import { useState, useEffect } from 'react';
 
-const apiToken = '<<Copiez le token de Spotify ici>>';
+const apiToken = 'BQC14AWbyBTanoCwbfXrmrI9mWCritF4kxmupKJpurUv3DN__LPSHt8hotI0pvymttm3jYSD3Qxl-_ejErzTVUZo8F4CN0_d6z2JOfvLv4SJcXt0QcB5HN3YtFK6lNpAJ-rHjIQ55NdClm3NpOpc';
 
 function shuffleArray(array) {
   let counter = array.length;
@@ -28,7 +29,55 @@ function getRandomNumber(x) {
   return Math.floor(Math.random() * x);
 }
 
+const AlbumCover = ({ track }) => {
+  const src = track.album.images[0].url;
+  const alt = 'Album cover for ' + track.album.name;
+  return (<img src={src} alt={alt} style={{ width: 400, height: 400 }}/>);
+}
+
 const App = () => {
+  const [tracks, setTracks] = useState();
+  const [songsLoaded, setSongsLoaded] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState(null);
+  
+  useEffect(() => {
+    fetch(`https://api.spotify.com/v1/me/tracks`, {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + apiToken,
+      },
+    })
+      .then(response => response.json())
+      .then((data) => {
+        setTracks(data.items);
+        const randomIndex = getRandomNumber(data.items.length);
+        setCurrentTrack(data.items[randomIndex].track);
+        setSongsLoaded(true);
+      });
+  }, []);
+
+    const checkAnswer = (id) => {
+    if (currentTrack.id === id) {
+      swal('Bravo !');
+    } else {
+      swal('Mauvaise réponse');
+    }
+  };
+
+  if (!songsLoaded) {
+    return (
+      <div className="App">
+        <img src={loading} className="App-logo" alt="logo"/>
+      </div>
+    );
+  }
+
+  const track1 = tracks[0].track;
+  const track2 = tracks[1].track;
+  const track3 = tracks[2].track;
+  
+  const propositions = shuffleArray([track1, track2, track3]);
+
   return (
     <div className="App">
       <header className="App-header">
@@ -36,9 +85,13 @@ const App = () => {
         <h1 className="App-title">Bienvenue sur le Blindtest</h1>
       </header>
       <div className="App-images">
-        <p>Ceci est une modification !</p>
+        <AlbumCover track={track1}/>
+        <Sound url={track1.preview_url} playStatus={Sound.status.PLAYING}/>
       </div>
       <div className="App-buttons">
+        <Button onClick={() => checkAnswer(track1.id)}>{track1.name}</Button>
+        <Button onClick={() => checkAnswer(track2.id)}>{track2.name}</Button>
+        <Button onClick={() => checkAnswer(track3.id)}>{track3.name}</Button>
       </div>
     </div>
   );
