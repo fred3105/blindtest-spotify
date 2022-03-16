@@ -36,10 +36,11 @@ const AlbumCover = ({ track }) => {
 }
 
 const App = () => {
+
   const [tracks, setTracks] = useState();
   const [songsLoaded, setSongsLoaded] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(null);
-  
+
   useEffect(() => {
     fetch(`https://api.spotify.com/v1/me/tracks`, {
       method: 'GET',
@@ -72,9 +73,12 @@ const App = () => {
     );
   }
 
-  const track1 = tracks[0].track;
-  const track2 = tracks[1].track;
-  const track3 = tracks[2].track;
+  const randomIndex1 = getRandomNumber(tracks.length);
+  const randomIndex2 = getRandomNumber(tracks.length);
+
+  const track1 = currentTrack;
+  const track2 = tracks[randomIndex1].track;
+  const track3 = tracks[randomIndex2].track;
   
   const propositions = shuffleArray([track1, track2, track3]);
 
@@ -89,9 +93,8 @@ const App = () => {
         <Sound url={track1.preview_url} playStatus={Sound.status.PLAYING}/>
       </div>
       <div className="App-buttons">
-        <Button onClick={() => checkAnswer(track1.id)}>{track1.name}</Button>
-        <Button onClick={() => checkAnswer(track2.id)}>{track2.name}</Button>
-        <Button onClick={() => checkAnswer(track3.id)}>{track3.name}</Button>
+            {propositions.map(track =>
+          <Button onClick={() => checkAnswer(track.id)}>{track.name}</Button>)}
       </div>
     </div>
   );
